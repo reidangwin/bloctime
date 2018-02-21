@@ -5,17 +5,24 @@ import Timer from './Timer'
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      seconds: 1500, 
-      timeStringMS: '25:00',
-      work_session_count: 0,
-      nextToggleAction: 'Start'
-    };
+
+    this.BREAK_SECONDS = 300;
+    this.WORK_SECONDS = 1500;
 
     this.secondsToMinSec = this.secondsToTimeStringMS.bind(this);
     this.startTimer = this.startTimer.bind(this);
     this.countdown = this.countdown.bind(this);
     this.timerButtonHandler = this.timerButtonHandler.bind(this);
+
+    this.state = {
+      seconds: this.WORK_SECONDS, 
+      timeStringMS: this.secondsToTimeStringMS(this.WORK_SECONDS),
+      onBreak: false,
+      workSessionCount: 0,
+      nextToggleAction: 'Start'
+    };
+
+
   }
 
   secondsToTimeStringMS(s) {
@@ -26,6 +33,15 @@ class App extends Component {
     let seconds = this.state.seconds - 1;
 
     if (seconds <= 0) {
+      let seconds = this.state.onBreak ? this.WORK_SECONDS : this.BREAK_SECONDS;
+      let onBreak = !this.state.onBreak;
+      let workSessionCount = !this.state.onBreak ? this.state.workSessionCount + 1 : this.state.workSessionCount;
+      this.setState({
+        workSessionCount,
+        seconds,
+        timeStringMS: this.secondsToTimeStringMS(seconds),
+        onBreak
+      })
       this.resetTimer();
       return
     }
@@ -38,23 +54,28 @@ class App extends Component {
   };
 
   timerButtonHandler() {
-    this.state.nextToggleAction == 'Start' ? this.startTimer() : this.resetTimer();
+    if (this.state.nextToggleAction == 'Start') {
+      this.startTimer();
+    } else {
+      this.resetTimer();
+    }
   }
 
   startTimer() {
     this.setState({
-      nextToggleAction: 'Reset'
-    }
+        nextToggleAction: 'Reset'
+      }
     )
     this.timer = setInterval(this.countdown, 1000);
   }
 
   resetTimer() {
     clearInterval(this.timer);
+    let seconds = this.state.onBreak ? this.BREAK_SECONDS : this.WORK_SECONDS;
     this.setState({
         nextToggleAction: 'Start',
-        seconds: 1500, 
-        timeStringMS: '25:00',
+        seconds,
+        timeStringMS: this.secondsToTimeStringMS(seconds)
       }
     )
   }
