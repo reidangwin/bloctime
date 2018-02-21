@@ -33,24 +33,35 @@ class App extends Component {
     let seconds = this.state.seconds - 1;
 
     if (seconds <= 0) {
-      let seconds = this.state.onBreak ? this.WORK_SECONDS : this.BREAK_SECONDS;
+      seconds = this.state.onBreak ? this.WORK_SECONDS : this.BREAK_SECONDS;
       let onBreak = !this.state.onBreak;
       let workSessionCount = !this.state.onBreak ? this.state.workSessionCount + 1 : this.state.workSessionCount;
+
+      if (workSessionCount > 3) {
+        workSessionCount = 0;
+        seconds = 1800;
+      }
+
       this.setState({
         workSessionCount,
         seconds,
         timeStringMS: this.secondsToTimeStringMS(seconds),
-        onBreak
+        onBreak,
+        nextToggleAction: 'Start',
       })
-      this.resetTimer();
+      clearInterval(this.timer);
       return
     }
+
+    /* Timer has been decremented at the top. We store the new seconds value in state and the caller (startTimer) will keep running the function until we hit 0, or resetTimer calls clearInterval. */
+
     this.setState(
       {
         seconds,
         timeStringMS: this.secondsToTimeStringMS(seconds)
       }
     );
+
   };
 
   timerButtonHandler() {
