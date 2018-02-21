@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import '../css/App.css';
 import Timer from './Timer'
+import buzz from 'buzz'
+import triangle from '../css/sounds/triangle_hit.mp3'
 
 class App extends Component {
   constructor() {
@@ -22,7 +24,9 @@ class App extends Component {
       nextToggleAction: 'Start'
     };
 
-
+    this.mySound = new buzz.sound( triangle, {
+      preload: true
+    });
   }
 
   secondsToTimeStringMS(s) {
@@ -33,6 +37,8 @@ class App extends Component {
     let seconds = this.state.seconds - 1;
 
     if (seconds <= 0) {
+      this.mySound.play();
+
       seconds = this.state.onBreak ? this.WORK_SECONDS : this.BREAK_SECONDS;
       let onBreak = !this.state.onBreak;
       let workSessionCount = !this.state.onBreak ? this.state.workSessionCount + 1 : this.state.workSessionCount;
@@ -65,7 +71,7 @@ class App extends Component {
   };
 
   timerButtonHandler() {
-    if (this.state.nextToggleAction == 'Start') {
+    if (this.state.nextToggleAction === 'Start') {
       this.startTimer();
     } else {
       this.resetTimer();
