@@ -21,7 +21,7 @@ class TaskList extends Component {
             </form>
               <table className="table table-striped table-dark">
                 <tbody>
-                  {Object.keys(this.props.taskList).map( (key) =>
+                  {Object.keys(this.props.taskList).reverse().map( (key) =>
                     <tr key={key}><td>{this.props.taskList[key]}</td></tr>
                   )};
                 </tbody>
