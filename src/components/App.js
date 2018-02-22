@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import '../css/App.css';
-import Timer from './Timer'
-import buzz from 'buzz'
-import triangle from '../css/sounds/triangle_hit.mp3'
+import Timer from './Timer';
+import TaskList from './TaskList';
+import buzz from 'buzz';
+import triangle from '../css/sounds/triangle_hit.mp3';
+import base from '../base';
+
 
 class App extends Component {
   constructor() {
@@ -15,18 +18,31 @@ class App extends Component {
     this.startTimer = this.startTimer.bind(this);
     this.countdown = this.countdown.bind(this);
     this.timerButtonHandler = this.timerButtonHandler.bind(this);
+    this.addTask = this.addTask.bind(this);
 
     this.state = {
       seconds: this.WORK_SECONDS, 
       timeStringMS: this.secondsToTimeStringMS(this.WORK_SECONDS),
       onBreak: false,
       workSessionCount: 0,
-      nextToggleAction: 'Start'
+      nextToggleAction: 'Start',
+      taskList: {} 
     };
 
     this.mySound = new buzz.sound( triangle, {
       preload: true
     });
+  }
+
+  componentWillMount() {
+    this.ref = base.syncState('taskList', {
+      context: this,
+      state: 'taskList'
+    });
+  }
+
+  componentWillUnmount() {
+    base.removeBinding(this.ref);
   }
 
   secondsToTimeStringMS(s) {
@@ -80,8 +96,8 @@ class App extends Component {
 
   startTimer() {
     this.setState({
-        nextToggleAction: 'Reset'
-      }
+      nextToggleAction: 'Reset'
+    }
     )
     this.timer = setInterval(this.countdown, 1000);
   }
@@ -90,22 +106,28 @@ class App extends Component {
     clearInterval(this.timer);
     let seconds = this.state.onBreak ? this.BREAK_SECONDS : this.WORK_SECONDS;
     this.setState({
-        nextToggleAction: 'Start',
-        seconds,
-        timeStringMS: this.secondsToTimeStringMS(seconds)
-      }
+      nextToggleAction: 'Start',
+      seconds,
+      timeStringMS: this.secondsToTimeStringMS(seconds)
+    }
     )
+  }
+
+  addTask(task){
+    const taskList = {...this.state.taskList};
+    const timestamp = Date.now();
+    taskList[`task-${timestamp}`] = task;
+    this.setState({ taskList });
   }
 
   render() {
     return (
       <div className="App">
-
-      <Timer seconds={this.state.seconds} timeStringMS={this.state.timeStringMS} timerButtonHandler={this.timerButtonHandler} nextToggleAction={this.state.nextToggleAction} />
+      <TaskList taskList={this.state.taskList} addTask={this.addTask} />
+      <Timer timeStringMS={this.state.timeStringMS} timerButtonHandler={this.timerButtonHandler} nextToggleAction={this.state.nextToggleAction} />
       </div>
     );
   }
 }
-
 
 export default App;
